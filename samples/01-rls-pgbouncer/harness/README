@@ -1,0 +1,26 @@
+# Harness de RLS + PgBouncer
+
+## Estado
+VERIFICADO — la ruta Docker pasa `test_pgbouncer_leak.sh` dos veces (2026-11-07).
+
+## Comandos locales del autor
+Ruta nativa en espacio de usuario (no requiere Docker):
+```bash
+cd /path/to/repo
+tools/env/up.sh
+make test-01
+```
+
+Ruta Docker (proyecto aislado `nexo-s01`, puertos 15431/16431 — distintos
+de los 15432/16432 del entorno nativo):
+```bash
+cd samples/01-rls-pgbouncer/harness
+docker compose up -d
+NEXO_PGBOUNCER_PORT=16431 bash test_pgbouncer_leak.sh
+docker compose down -v
+```
+
+## Qué prueba
+1. Filtración de la configuración a nivel de sesión entre conexiones de PgBouncer
+2. SET LOCAL evita la filtración con pooling por transacción
+3. Denegación por defecto de RLS sin contexto de tenant y lecturas entre tenants

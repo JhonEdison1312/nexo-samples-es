@@ -1,0 +1,27 @@
+# Harness de cadena de auditoría
+
+## Estado
+VERIFICADO — la ruta Docker pasa `test_tampering.sh` dos veces (2026-11-07).
+
+## Comandos locales del autor
+Ruta nativa en espacio de usuario (no requiere Docker):
+```bash
+cd /path/to/repo
+tools/env/up.sh
+make test-02
+```
+
+Ruta Docker (proyecto aislado `nexo-s02`, puerto 15433 — distinto del
+15432 del entorno nativo):
+```bash
+cd samples/02-audit-chain/harness
+docker compose up -d
+NEXO_PG_PORT=15433 NEXO_SOCKET_DIR=/nonexistent bash test_tampering.sh
+docker compose down -v
+```
+
+## Qué prueba
+1. Una cadena HMAC válida se verifica como `status: ok`
+2. La manipulación de un registro intermedio se detecta (`status: compromised`)
+3. La eliminación de un registro se detecta
+4. La reordenación de registros se detecta

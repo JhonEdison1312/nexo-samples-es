@@ -1,0 +1,44 @@
+=== DEMO DE VERIFICACIÓN 03-EDGE-PIPELINE ===
+
+--- PASO 1: Configuración de clave vinculada al dispositivo (fail-closed post-corrección y opt-in de desarrollo) ---
+[TS] [error] [:] [C5] Falló el cifrado vinculado al hardware; se rechaza el archivo de clave AES en texto plano. Opt-in de simulador/desarrollo: NEXO_ALLOW_DEV_KEY_FALLBACK=1
+[TS] [error] [:] Falló la persistencia de la clave AES en archivo
+Sin la bandera de opt-in: el hardware binding falla -> fail-closed: SÍ (clave rechazada)
+  [PASS] fail-closed: clave rechazada sin opt-in
+[TS] [error] [:] [C5] NEXO_ALLOW_DEV_KEY_FALLBACK=1: se escribe el archivo de clave AES en texto plano (solo simulador/desarrollo), modo 0600
+[TS] [info] [:] Clave AES-256 aprovisionada
+Con NEXO_ALLOW_DEV_KEY_FALLBACK=1: clave aprovisionada: SÍ (modo 0600)
+  [PASS] opt-in: clave aprovisionada con NEXO_ALLOW_DEV_KEY_FALLBACK=1
+
+--- PASO 2: Inicialización del outbox SQLite ---
+Esquema del outbox SQLite creado: PRAGMA journal_mode=WAL; synchronous=EXTRA
+
+--- PASO 3: Captura de evento sin conexión ---
+[TS] [info] [:] [STUB] Sensor biométrico inicializado (dev-stub)
+Evento de asistencia registrado en el outbox: ÉXITO
+Registros pendientes de sincronización en el outbox: 1
+  [PASS] evento biométrico persistido en el outbox
+  [PASS] el outbox tiene exactamente 1 registro pendiente
+
+--- PASO 4: Fallo de red y contabilidad de reintentos ---
+Intentando sincronizar con el servidor inalcanzable...
+Falló la sincronización. Contador de reintentos incrementado a: 1
+El registro permanece en cola en el outbox: SÍ
+  [PASS] contador de intentos de reintento incrementado
+
+--- PASO 5: Ingesta síncrona exitosa ---
+Carga cifrada con AES-256-GCM (IV + ciphertext + tag)
+[TS] [info] [:] [SERVER] Ingesta OK: evento aceptado (202 Accepted)
+Respuesta del servidor (primera entrega): HTTP 202 (Aceptado)
+  [PASS] primera entrega aceptada (HTTP 202)
+Elemento del outbox marcado como sincronizado. Registros pendientes restantes: 0
+  [PASS] outbox vaciado tras la sincronización
+
+--- PASO 6: Detección de ataque de replay ---
+El atacante reenvía exactamente el mismo paquete cifrado con nonce duplicado...
+[TS] [warning] [:] [SERVER] EDGE_REPLAY_NONCE_DUPLICATE: ¡Ataque de replay detectado! Nonce ya utilizado: <NONCE>
+Respuesta del servidor (paquete de replay): HTTP 403 (Nonce ya utilizado)
+  [PASS] paquete de replay rechazado (HTTP 403)
+¡El ataque de replay fue RECHAZADO por el servidor!
+
+=== DEMO 03-EDGE-PIPELINE COMPLETA: TODAS LAS COMPROBACIONES PASARON ===

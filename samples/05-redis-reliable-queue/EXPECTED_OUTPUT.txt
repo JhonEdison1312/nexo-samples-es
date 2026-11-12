@@ -1,0 +1,24 @@
+=== T1: LMOVE confiable — el job se mueve de ingest a processing de forma atómica ===
+[PASS] cola ingest vacía tras el pop
+[PASS] cola processing tiene 1 elemento
+[PASS] acción del job intacta
+[PASS] processing_since inyectado
+[PASS] processing vacía tras el ack
+
+=== T2: Recuperación de zombie por GC — job viejo en processing se reencola ===
+[PASS] el zombie está en processing antes del GC
+[PASS] ingest vacía antes del GC
+[PASS] el GC recuperó 1 zombie
+[PASS] processing vacía tras el GC
+[PASS] ingest tiene el job recuperado
+
+=== T3: Promoción a DLQ — job que excede el límite de reintentos se mueve a DLQ ===
+[PASS] ingest vacía tras todos los reintentos
+[PASS] DLQ tiene 1 job fallido
+[PASS] reintentos del job en DLQ == 4
+[PASS] acción del job en DLQ intacta
+
+=== Resumen ===
+Pruebas SUPERADAS: 14
+Pruebas FALLIDAS: 0
+Todas las pruebas de invariantes de la cola SUPERADAS.

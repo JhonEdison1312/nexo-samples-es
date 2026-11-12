@@ -1,0 +1,24 @@
+=== DEMO DE VERIFICACIÓN: 02-AUDIT-CHAIN ===
+Objetivo: nexo como nexo_app
+
+--- TEST 1: Generación de cadena secuencial válida ---
+Se insertaron 5 eventos de auditoría secuenciales.
+Resultado de la validación: {"status": "ok", "school_id": null, "total_records": 5}
+  [PASS] TEST 1 cadena válida: status=ok
+
+--- TEST 2: Detección de manipulación de un registro intermedio ---
+Se modificó directamente en la base de datos el payload del evento intermedio ('ATTENDANCE_OVERRIDE').
+Resultado de la validación: {"status": "compromised", "valid_up_to": 1, "total_checked": 3, "broken_at_audit_id": "<UUID>"}
+  [PASS] TEST 2 manipulación intermedia: status=compromised
+
+--- TEST 3: Detección de eliminación de un registro ---
+Se eliminó el evento n.º 3 ('ATTENDANCE_OVERRIDE') de la secuencia.
+Resultado de la validación: {"status": "compromised", "valid_up_to": 1, "total_checked": 3, "broken_at_audit_id": "<UUID>"}
+  [PASS] TEST 3 eliminación: status=compromised
+
+--- TEST 4: Detección de reordenación de registros ---
+Se movió la marca de tiempo del evento n.º 1 ('AUTH_LOGIN') más allá del evento n.º 5, rompiendo la secuencia de la cadena.
+Resultado de la validación: {"status": "compromised", "valid_up_to": -1, "total_checked": 1, "broken_at_audit_id": "<UUID>"}
+  [PASS] TEST 4 reordenación: status=compromised
+
+=== DEMO 02-AUDIT-CHAIN COMPLETADA: TODAS LAS COMPROBACIONES PASARON ===

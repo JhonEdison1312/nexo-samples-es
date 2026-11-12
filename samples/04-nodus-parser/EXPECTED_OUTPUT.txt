@@ -1,0 +1,43 @@
+=== DEMO DE VERIFICACIÓN 04-NODUS-PARSER ===
+
+--- PRUEBA 1: Clasificación de intent y validación estricta de entidades ---
+Consulta: "¿Cómo está la asistencia del grupo 10-A hoy?"
+Dominio: formal
+Intent: attendance_today
+Confianza: 0.95
+Grupo extraído: 10-A
+Resultado: CLASIFICACIÓN DE INTENT SUPERADA
+
+--- PRUEBA 2: Defensa contra inyección maliciosa y escalada de scope ---
+Consulta adversarial: "drop_tables with group ALL"
+Intent forzado: out_of_scope (los intents no listados se fuerzan a out_of_scope)
+Scope comodín 'ALL': ELIMINADO POR LA WHITELIST
+Resultado: INYECCIÓN ADVERSARIAL BLOQUEADA CORRECTAMENTE
+
+--- PRUEBA 3: Parseo -> Plan -> RBAC -> Ejecución SQL de solo lectura ---
+1. Parseo: texto de entrada parseado a intent: attendance_today, entidad: group=10-A
+2. Plan: Capacidad=attendance.summary, Acción=count (SIMULADO)
+3. Verificación RBAC: Rol=TEACHER autorizado para attendance.summary: PERMITIDO (SIMULADO)
+4. SQL de solo lectura: SELECT '10-A' AS group_name, 28 AS present, 2 AS absent (SIMULADO)
+Resultado de BD: present=28, absent=2 (SIMULADO)
+Respuesta determinista verificada: "El grupo 10-A registra 28 estudiantes presentes y 2 ausencias hoy."
+
+--- PRUEBA 4: Guardia contra alucinaciones post-generación (nxLlmComposeGuard) ---
+4a. Composición con cifras precisas:
+    Texto: "El grupo 10-A registra 28 estudiantes presentes y 2 ausencias el día de hoy."
+    Guardia: PASS (Aceptada)
+4b. Inflación alucinada de cifras:
+    Texto: "El grupo 10-A tiene 50 presentes y 10 ausencias."
+    Guardia: PASS (Bloqueada correctamente)
+4c. Falsa negación de datos cuando rows > 0:
+    Texto: "No se encontraron registros de asistencia para este grupo."
+    Guardia: PASS (Bloqueada correctamente)
+4d. Excusa técnica fabricada ("falló la red"):
+    Texto: "El grupo tiene 28 presentes pero falló la red del colegio."
+    Guardia: PASS (Bloqueada correctamente)
+
+--- PRUEBA 5: Degradación segura cuando el LLM no está disponible ---
+LLM deshabilitado: nxLlmClassify devolvió null (degrada de forma segura a plantillas deterministas)
+Resultado del fallback: DEGRADACIÓN SEGURA OK
+
+=== DEMO 04-NODUS-PARSER COMPLETA: TODAS LAS VERIFICACIONES SUPERADAS ===

@@ -1,0 +1,17 @@
+=== S1: sintaxis y portabilidad de shellcheck ===
+[PASS] shellcheck create_monthly_partition.sh
+[PASS] shellcheck drop_old_partitions.sh
+
+=== S2: crear partición para el mes siguiente ===
+[PASS] Partición harness_part_test_2026_12 creada
+
+=== S3: doble creación idempotente ===
+[PASS] El doble CREATE TABLE IF NOT EXISTS es idempotente
+
+=== S4: fn_drop_old_partitions() es invocable ===
+[PASS] fn_drop_old_partitions(24) devolvió: 0
+
+=== Resumen ===
+Pruebas SUPERADAS: 5
+Pruebas FALLIDAS: 0
+=== DEMO 06-TABLE-PARTITIONING COMPLETA: TODAS LAS VERIFICACIONES SUPERADAS ===
